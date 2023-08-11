@@ -1,0 +1,263 @@
+from scapy.all import *
+import socket
+
+def syn_scan(host, ports):
+    open_ports = []
+    closed_ports = []
+
+    for port in ports:
+        response = sr1(IP(dst=host)/TCP(dport=port, flags="S"), timeout=2, verbose=0)
+        if response and response.haslayer(TCP) and response.getlayer(TCP).flags == 0x12:
+            open_ports.append(port)
+            send(IP(dst=host)/TCP(dport=response.sport, flags="R"), verbose=0)
+        else:
+            closed_ports.append(port)
+
+    return open_ports, closed_ports
+
+def dns_scan(host):
+    dns_server_ports = [53]
+    open_ports, closed_ports = syn_scan(host, dns_server_ports)
+
+    if open_ports:
+        print("DNS server(s) found at %s" % host)
+        for port in open_ports:
+            print("Port %d is open" % port)
+    else:
+        print("No DNS server found at %s" % host)
+
+host = "8.8.8.8"
+dns_scan(host)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+from scapy.all import *
+from datetime import datetime
+
+def syn_scan(host, ports):
+    open_ports = []
+    start_time = datetime.now()
+    print(f"Scanning host {host}...\n")
+    
+    for port in ports:
+        src_port = RandShort()
+        response = sr1(IP(dst=host)/TCP(sport=src_port, dport=port, flags="S"), timeout=2, verbose=0)
+        
+        if response and response.haslayer(TCP) and response.getlayer(TCP).flags == 0x12:
+            open_ports.append(port)
+    
+    end_time = datetime.now()
+    scan_duration = end_time - start_time
+    
+    print(f"Scanning completed in {scan_duration.total_seconds()} seconds.")
+    print(f"Open ports at {host}:")
+    print(open_ports)
+
+def dns_scan(host):
+    dns_packet = IP(dst=host)/UDP(dport=53)/DNS(rd=1, qd=DNSQR(qname="google.com"))
+    response = sr1(dns_packet, timeout=2, verbose=0)
+    
+    if response and response.haslayer(DNS) and response.getlayer(DNS).an:
+        print(f"DNS Server found at {host}")
+    else:
+        print(f"No DNS Server found at {host}")
+
+# Địa chỉ IP và danh sách các cổng cần quét
+host = "8.8.8.8"
+ports = [80, 443, 8080]
+
+syn_scan(host, ports)
+dns_scan(host)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+from scapy.all import *
+import socket
+from datetime import datetime as dt
+
+def syn_scan(host, ports):
+    open_ports = []
+    closed_ports = []
+    start_time = dt.now()
+
+    print(f"Scanning {host} for open ports...\n")
+    for port in ports:
+        response = sr1(IP(dst=host)/TCP(dport=port, flags="S"), timeout=2, verbose=0)
+        if response and response.haslayer(TCP) and response[TCP].flags == 0x12:
+            open_ports.append(port)
+        else:
+            closed_ports.append(port)
+
+    end_time = dt.now()
+    scan_duration = end_time - start_time
+
+    print(f"Scan completed in {scan_duration.total_seconds()} seconds.\n")
+    print("Open ports:")
+    if open_ports:
+        for port in open_ports:
+            print(port)
+    else:
+        print("No open ports found.")
+
+    print("\nClosed ports:")
+    if closed_ports:
+        for port in closed_ports:
+            print(port)
+    else:
+        print("No closed ports found.")
+
+def dns_scan(host):
+    response = sr1(IP(dst=host)/UDP(dport=53)/DNS(rd=1, qd=DNSQR(qname="google.com")), timeout=2, verbose=0)
+    if response and response.haslayer(DNS) and response[DNS].an:
+        print(f"DNS Server found at {host}")
+    else:
+        print(f"No DNS Server found at {host}")
+
+host = "8.8.8.8"
+ports = range(1, 100)  # Example port range
+
+syn_scan(host, ports)
+dns_scan(host)
+
+
+
+
+
+
+
+
+
+
+
+
+
+from scapy.all import *
+from datetime import datetime
+
+def syn_scan(host, ports):
+    open_ports = []
+    start_time = datetime.now()
+
+    print(f"Scanning host: {host}")
+    print("Scan started at:", start_time)
+
+    for port in ports:
+        response = sr1(IP(dst=host)/TCP(dport=port, flags="S"), timeout=2, verbose=0)
+        if response is not None and response.haslayer(TCP) and response.getlayer(TCP).flags == 0x12:
+            open_ports.append(port)
+
+    end_time = datetime.now()
+    total_time = end_time - start_time
+
+    print(f"Scan completed in {total_time}")
+    print("Open ports at", host, ":")
+    for port in open_ports:
+        print(port)
+
+def dns_scan(host):
+    response = sr1(IP(dst=host)/UDP(dport=53)/DNS(rd=1, qd=DNSQR(qname="google.com")), timeout=2, verbose=0)
+    if response is not None and response.haslayer(DNS) and response.getlayer(DNS).an != DNSRR():
+        print(f"DNS Server at {host}")
+
+host = "8.8.8.8"
+ports = range(1, 100)  # Scan ports from 1 to 99
+
+syn_scan(host, ports)
+dns_scan(host)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+from scapy.all import *
+
+def syn_scan(host, ports):
+    open_ports = []
+    closed_ports = []
+    
+    print(f"Scanning {host} for open ports...")
+    for port in ports:
+        src_port = RandShort()  # Randomize source port
+        syn_packet = IP(dst=host)/TCP(sport=src_port, dport=port, flags="S")
+        response = sr1(syn_packet, timeout=2, verbose=0)
+        
+        if response and response.haslayer(TCP) and response[TCP].flags == "SA":
+            open_ports.append(port)
+        else:
+            closed_ports.append(port)
+    
+    print(f"Open ports at {host}:")
+    print(open_ports)
+    print(f"Closed ports at {host}:")
+    print(closed_ports)
+
+def dns_scan(host):
+    dns_packet = IP(dst=host)/UDP(dport=53)/DNS(rd=1,qd=DNSQR(qname="google.com"))
+    response = sr1(dns_packet, timeout=2, verbose=0)
+    
+    if response:
+        print(f"DNS Server at {host}")
+
+# Define the target host and ports to scan
+host = "8.8.8.8"
+ports = [80, 443, 8080, 3389, 22]  # Example ports to scan
+
+# Perform the scans
+syn_scan(host, ports)
+dns_scan(host)
+
